@@ -1,0 +1,171 @@
+<!DOCTYPE html><html>
+<head>
+    <title>My Play</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(45deg, ##34ebba, #34ebba);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            animation: bgAnimation 0.1s infinite alternate;
+        }
+        @keyframes bgAnimation {
+            from { background: linear-gradient(45deg, #ff9a9e, #fad0c4); }
+            to { background: linear-gradient(45deg, #a1c4fd, #c2e9fb); }
+        }
+        .search-bar {
+            margin: 10px;
+            padding: 10px;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #28a745;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+        }
+        .app-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 10px;
+        }
+        .app-container {
+            width: 160px;
+            background: white;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .app-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+        }
+        button {
+            background: green;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-top: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .hidden-admin {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            cursor: pointer;
+        }
+        #adminPanel {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">SOFTWARE PORTAL</h1>
+    <input type="text" class="search-bar" placeholder="Search for apps..." onkeyup="searchApps()">
+    <div class="app-grid" id="appList"></div><div class="hidden-admin" onclick="openAdminPanel()"></div>
+
+<div id="adminPanel">
+    <h2>Admin Panel</h2>
+    <input type="text" id="appName" placeholder="App Ka Naam">
+    <input type="text" id="appDesc" placeholder="App Ki Description">
+    <input type="text" id="appLink" placeholder="Download Link">
+    <input type="file" id="appLogo" accept="image/*">
+    <button onclick="addApp()">Add App</button>
+    <button onclick="closeAdminPanel()">Close</button>
+    <h2>Apps List</h2>
+    <div id="adminAppList"></div>
+</div>
+
+<script>
+    let apps = JSON.parse(localStorage.getItem("apps")) || [];
+    function updateAppList() {
+        let appListDiv = document.getElementById("appList");
+        let adminAppListDiv = document.getElementById("adminAppList");
+        appListDiv.innerHTML = "";
+        adminAppListDiv.innerHTML = "";
+        apps.forEach((app, index) => {
+            appListDiv.innerHTML += `<div class='app-container'>
+                <img src='${app.logo}' alt='App Image'>
+                <h3>${app.name}</h3>
+                <p>${app.desc}</p>
+                <button onclick="downloadApp('${app.link}')">OPEN SYSTEM</button>
+            </div>`;
+            adminAppListDiv.innerHTML += `<div>
+                <span>${app.name} - ${app.desc}</span>
+                <button onclick="deleteApp(${index})">Delete</button>
+            </div>`;
+        });
+    }
+    function addApp() {
+        let name = document.getElementById("appName").value;
+        let desc = document.getElementById("appDesc").value;
+        let link = document.getElementById("appLink").value;
+        let logoInput = document.getElementById("appLogo").files[0];
+        if(name && desc && link && logoInput) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                apps.push({ name, desc, link, logo: e.target.result });
+                localStorage.setItem("apps", JSON.stringify(apps));
+                updateAppList();
+            };
+            reader.readAsDataURL(logoInput);
+        }
+    }
+    function deleteApp(index) {
+        apps.splice(index, 1);
+        localStorage.setItem("apps", JSON.stringify(apps));
+        updateAppList();
+    }
+    function downloadApp(link) {
+        let userChoice = confirm('This is V:3.0 tool. Your device is not able to download.\n\nAap ise bina download kiye chalana chahte hain?');
+        if (userChoice) {
+            window.location.href = link;
+        }
+    }
+    function openAdminPanel() {
+        let password = prompt('Enter Admin Password:');
+        if (password === 'SANKALP') {
+            document.getElementById('adminPanel').style.display = 'block';
+        } else {
+            alert('Wrong Password!');
+        }
+    }
+    function closeAdminPanel() {
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+    updateAppList();
+</script>
+
+</body>
+</html>
